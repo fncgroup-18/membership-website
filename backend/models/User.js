@@ -24,6 +24,35 @@ const userSchema = new mongoose.Schema({
         enum: ['basic', 'premium'],
         default: 'basic'
     },
+    companyName: {
+        type: String,
+        default: ''
+    },
+    companyEmail: {
+        type: String,
+        default: ''
+    },
+    telephone: {
+        type: String,
+        default: ''
+    },
+    companyDescription: {
+        type: String,
+        default: ''
+    },
+    membershipDate: {
+        type: Date,
+        default: Date.now
+    },
+    membershipValidity: {
+        type: Date,
+        default: function() {
+            // Set default validity to 1 year from membership date
+            const date = new Date();
+            date.setFullYear(date.getFullYear() + 1);
+            return date;
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

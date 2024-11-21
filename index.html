@@ -97,12 +97,34 @@
             border-radius: 5px;
         }
 
+        .membership-info p {
+            margin: 10px 0;
+            color: #666;
+        }
+
         #memberContent {
             margin-top: 20px;
         }
 
         #logoutBtn {
             display: none;
+        }
+
+        .company-profile {
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
         }
 
         @media (max-width: 768px) {
@@ -162,8 +184,22 @@
                 <h2>Welcome, <span id="memberName"></span>!</h2>
                 <div class="membership-info">
                     <h3>Your Membership: <span id="membershipLevel"></span></h3>
-                    <div id="memberContent"></div>
+                    <p>Valid until: <span id="membershipValidity"></span></p>
+                    <p>Member since: <span id="membershipDate"></span></p>
                 </div>
+                
+                <div class="company-profile">
+                    <h3>Company Profile</h3>
+                    <form id="companyProfileForm">
+                        <input type="text" id="companyName" placeholder="Company Name" required>
+                        <input type="email" id="companyEmail" placeholder="Company Email" required>
+                        <input type="tel" id="telephone" placeholder="Telephone" required>
+                        <textarea id="companyDescription" placeholder="Company Description" rows="4" required></textarea>
+                        <button type="submit" class="btn">Update Profile</button>
+                    </form>
+                </div>
+                
+                <div id="memberContent"></div>
             </div>
         </main>
     </div>

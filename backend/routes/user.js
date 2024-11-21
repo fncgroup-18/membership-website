@@ -6,16 +6,35 @@ const router = express.Router();
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
     try {
-        res.json({
-            user: {
-                id: req.user._id,
-                name: req.user.name,
-                email: req.user.email,
-                membershipType: req.user.membershipType
-            }
-        });
+        const user = await User.findById(req.user.id).select('-password');
+        res.json(user);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
+
+// Update user profile
+router.put('/profile', auth, async (req, res) => {
+    try {
+        const { companyName, companyEmail, telephone, companyDescription } = req.body;
+        
+        // Find user and update
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            {
+                companyName,
+                companyEmail,
+                telephone,
+                companyDescription
+            },
+            { new: true }
+        ).select('-password');
+
+        res.json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
     }
 });
 

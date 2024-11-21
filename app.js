@@ -1,5 +1,7 @@
 // API Configuration
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000/api'
+    : 'https://your-backend-url.com/api'; // You'll need to update this with your actual backend URL
 
 // DOM Elements
 const loginBtn = document.getElementById('loginBtn');
@@ -11,6 +13,9 @@ const sections = document.querySelectorAll('.section');
 const memberName = document.getElementById('memberName');
 const membershipLevel = document.getElementById('membershipLevel');
 const memberContent = document.getElementById('memberContent');
+const companyProfileForm = document.getElementById('companyProfileForm');
+const membershipValidity = document.getElementById('membershipValidity');
+const membershipDate = document.getElementById('membershipDate');
 
 // Helper Functions
 const showSection = (sectionId) => {
@@ -37,6 +42,61 @@ const updateNavButtons = () => {
 
 const showError = (message) => {
     alert(message || 'An error occurred. Please try again.');
+};
+
+const updateProfile = async (userData) => {
+    try {
+        const response = await fetch(`${API_URL}/user/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(userData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update profile');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Profile update error:', error);
+        throw error;
+    }
+};
+
+const loadUserProfile = async () => {
+    try {
+        const response = await fetch(`${API_URL}/user/profile`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load profile');
+        }
+
+        const user = await response.json();
+        
+        // Update form fields
+        document.getElementById('companyName').value = user.companyName || '';
+        document.getElementById('companyEmail').value = user.companyEmail || '';
+        document.getElementById('telephone').value = user.telephone || '';
+        document.getElementById('companyDescription').value = user.companyDescription || '';
+        
+        // Update membership info
+        memberName.textContent = user.name;
+        membershipLevel.textContent = user.membershipType;
+        membershipDate.textContent = new Date(user.membershipDate).toLocaleDateString();
+        membershipValidity.textContent = new Date(user.membershipValidity).toLocaleDateString();
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        showError(error.message);
+    }
 };
 
 // Event Listeners
@@ -72,10 +132,7 @@ loginForm.addEventListener('submit', async (e) => {
         localStorage.setItem('token', data.token);
         showSection('member-section');
         updateNavButtons();
-        if (data.user) {
-            memberName.textContent = data.user.name;
-            membershipLevel.textContent = data.user.membershipType;
-        }
+        await loadUserProfile(); // Load user profile after login
         loginForm.reset();
     } catch (error) {
         console.error('Login error:', error);
@@ -120,6 +177,23 @@ signupForm.addEventListener('submit', async (e) => {
         alert('Registration successful! Welcome to MemberHub!');
     } catch (error) {
         console.error('Registration error:', error);
+        showError(error.message);
+    }
+});
+
+companyProfileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = {
+        companyName: document.getElementById('companyName').value,
+        companyEmail: document.getElementById('companyEmail').value,
+        telephone: document.getElementById('telephone').value,
+        companyDescription: document.getElementById('companyDescription').value
+    };
+    
+    try {
+        await updateProfile(formData);
+        showError('Profile updated successfully!');
+    } catch (error) {
         showError(error.message);
     }
 });

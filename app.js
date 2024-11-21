@@ -1,7 +1,7 @@
 // API Configuration
 const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:3000/api'
-    : 'https://your-backend-url.com/api'; // You'll need to update this with your actual backend URL
+    : 'https://membership-website-backend.onrender.com/api';  // Update this with your deployed backend URL
 
 // DOM Elements
 const loginBtn = document.getElementById('loginBtn');
@@ -70,6 +70,7 @@ const updateProfile = async (userData) => {
 
 const loadUserProfile = async () => {
     try {
+        console.log('Loading user profile...');
         const response = await fetch(`${API_URL}/user/profile`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -77,10 +78,12 @@ const loadUserProfile = async () => {
         });
 
         if (!response.ok) {
+            console.error('Profile load failed:', await response.text());
             throw new Error('Failed to load profile');
         }
 
         const user = await response.json();
+        console.log('Profile loaded:', user);
         
         // Update form fields
         document.getElementById('companyName').value = user.companyName || '';
@@ -89,10 +92,10 @@ const loadUserProfile = async () => {
         document.getElementById('companyDescription').value = user.companyDescription || '';
         
         // Update membership info
-        memberName.textContent = user.name;
-        membershipLevel.textContent = user.membershipType;
-        membershipDate.textContent = new Date(user.membershipDate).toLocaleDateString();
-        membershipValidity.textContent = new Date(user.membershipValidity).toLocaleDateString();
+        memberName.textContent = user.name || '';
+        membershipLevel.textContent = user.membershipType || '';
+        membershipDate.textContent = user.membershipDate ? new Date(user.membershipDate).toLocaleDateString() : '';
+        membershipValidity.textContent = user.membershipValidity ? new Date(user.membershipValidity).toLocaleDateString() : '';
     } catch (error) {
         console.error('Error loading profile:', error);
         showError(error.message);
@@ -130,9 +133,13 @@ loginForm.addEventListener('submit', async (e) => {
         
         const data = await response.json();
         localStorage.setItem('token', data.token);
+        
+        // Load user profile first
+        await loadUserProfile();
+        
+        // Then show member section and update navigation
         showSection('member-section');
         updateNavButtons();
-        await loadUserProfile(); // Load user profile after login
         loginForm.reset();
     } catch (error) {
         console.error('Login error:', error);
